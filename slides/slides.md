@@ -35,6 +35,12 @@ http://www.m-brace.net/
 
 ***
 
+### Slides and code
+
+https://github.com/anirothan/FPDaysMBrace
+
+***
+
 ### What is MBrace?
 
 ***
@@ -364,6 +370,8 @@ https://github.com/mbraceproject/MBrace.Azure
 ### Thank you
 
 https://github.com/mbraceproject
+
+http://www.m-brace.net/
 
 ***
 
