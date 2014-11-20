@@ -43,7 +43,7 @@ let runtime = MBrace.InitLocal(totalNodes = 4)
 // create CloudArray of input data
 let client = runtime.GetStoreClient()
 let data = 
-    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\data\Shakespeare")
+    Path.Combine(__SOURCE_DIRECTORY__, @"..\..\data")
     |> Directory.EnumerateFiles
     |> Seq.map File.ReadLines
     |> Seq.map (fun lines -> client.CreateCloudArray("wordcount", lines))
