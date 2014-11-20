@@ -14,6 +14,8 @@ open FPDays.Lib
 
 
 
+
+
 let rec mapReduce (mapF: 'T -> 'R) 
                     (reduceF: 'R -> 'R -> 'R)
                     (id : 'R) (input: 'T list) =         
@@ -34,6 +36,8 @@ let rec mapReduce (mapF: 'T -> 'R)
 
 
 
+
+
 #load "wordcount.fsx"
 open Wordcount
 
@@ -47,7 +51,7 @@ let data =
     |> Seq.collect id
     |> Seq.toList
 
-//let runtime = MBrace.InitLocal(totalNodes = 4)
+let runtime = MBrace.InitLocal(totalNodes = 4)
 
 
 
@@ -65,13 +69,39 @@ data.Length
 
 
 
+// fetch files from the data source
+let fileSource = Path.Combine(__SOURCE_DIRECTORY__, @"..\..\data")
+let files = Directory.EnumerateFiles fileSource |> Seq.toArray
+
+let cloudFiles = runtime.GetStoreClient().UploadFiles files |> Array.toList
 
 
 
+let rec mapReduce (mapF: 'T -> Cloud<'R>) 
+                    (reduceF: 'R -> 'R -> 'R)
+                    (id : 'R) (input: 'T list) =         
+    cloud {
+        match input with
+        | [] -> return id
+        | [value] -> return! mapF value
+        | _ ->
+            let left, right = List.split input
+            let! r, r' = 
+                (mapReduce mapF reduceF id left)
+                    <||> 
+                (mapReduce mapF reduceF id right)
+            return reduceF r r'
+    }
 
 
+let mapF (cfile : ICloudFile) = cloud {
+    let! text = CloudFile.ReadAllText cfile
+    return WordCount.compute text
+}
 
+let proc = runtime.CreateProcess(mapReduce mapF WordCount.combine WordCount.empty cloudFiles)
 
+proc
 
 
 
@@ -84,10 +114,10 @@ open System.IO
 #load "wordcount.fsx"
 open Wordcount
 
-let runtime = MBrace.InitLocal(totalNodes = 4)
+//let runtime = MBrace.InitLocal(totalNodes = 4)
 
 // fetch files from the data source
-let fileSource = Path.Combine(__SOURCE_DIRECTORY__, @"..\data\Shakespeare")
+let fileSource = Path.Combine(__SOURCE_DIRECTORY__, @"..\..\data")
 let files = Directory.EnumerateFiles fileSource |> Seq.toArray
 
 let cloudFiles = runtime.GetStoreClient().UploadFiles files
