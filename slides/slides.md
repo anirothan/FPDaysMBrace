@@ -164,7 +164,7 @@ Can you spot potential issues/problems?
 ***
 
 ### Communication Overhead
-Processed data needlessly passed copied arroun worker machines.
+Processed data needlessly passed copied arround worker machines.
 
 ***
 
